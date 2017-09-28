@@ -8,7 +8,8 @@ class App extends Component {
   }
 
   login() {
-    this.props.auth.login();
+    this.goTo('login');
+    //this.props.auth.login();
   }
 
   logout() {

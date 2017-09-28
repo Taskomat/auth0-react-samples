@@ -4,6 +4,12 @@ class Home extends Component {
   login() {
     this.props.auth.login();
   }
+
+  getUserName() {
+      const userProfile = JSON.parse(localStorage.getItem('profile'));
+      console.log(userProfile)
+      return userProfile.name;
+  }
   render() {
     const { isAuthenticated } = this.props.auth;
     return (
@@ -11,7 +17,7 @@ class Home extends Component {
         {
           isAuthenticated() && (
               <h4>
-                You are logged in!
+                You are logged in as {this.getUserName()}!
               </h4>
             )
         }

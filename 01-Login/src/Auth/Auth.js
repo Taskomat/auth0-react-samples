@@ -17,23 +17,52 @@ export default class Auth {
     this.logout = this.logout.bind(this);
     this.handleAuthentication = this.handleAuthentication.bind(this);
     this.isAuthenticated = this.isAuthenticated.bind(this);
+    this.setUserProfile = this.setUserProfile.bind(this);
   }
 
   login() {
     this.auth0.authorize();
   }
 
+  loginWithCredentials({username, password}) {
+    this.auth0.redirect.loginWithCredentials({
+        username,
+        password,
+        connection: 'Username-Password-Authentication',
+        scope: 'openid'
+    }, this.handleAuthentication);
+  }
+
   handleAuthentication() {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
+
+        this.parseUserInfo(authResult.accessToken);
         this.setSession(authResult);
         history.replace('/home');
+
       } else if (err) {
         history.replace('/home');
         console.log(err);
         alert(`Error: ${err.error}. Check the console for further details.`);
       }
     });
+  }
+
+  parseUserInfo(accessToken) {
+      this.auth0.client.userInfo(accessToken, (err, user) => {
+          if(user) {
+              console.log(user);
+              this.setUserProfile(user);
+          } else if (err) {
+              console.log(err);
+              alert(`Error: ${err.error}. Check the console for further details.`);
+          }
+      });
+  }
+
+  setUserProfile(user) {
+      localStorage.setItem('profile', JSON.stringify(user));
   }
 
   setSession(authResult) {
@@ -56,7 +85,7 @@ export default class Auth {
   }
 
   isAuthenticated() {
-    // Check whether the current time is past the 
+    // Check whether the current time is past the
     // access token's expiry time
     let expiresAt = JSON.parse(localStorage.getItem('expires_at'));
     return new Date().getTime() < expiresAt;
