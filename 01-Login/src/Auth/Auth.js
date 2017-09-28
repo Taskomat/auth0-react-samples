@@ -2,6 +2,8 @@ import history from '../history';
 import auth0 from 'auth0-js';
 import { AUTH_CONFIG } from './auth0-variables';
 
+const DB_CONNECTION = 'Username-Password-Authentication';
+
 export default class Auth {
   auth0 = new auth0.WebAuth({
     domain: AUTH_CONFIG.domain,
@@ -12,30 +14,39 @@ export default class Auth {
   });
 
   constructor() {
-    this.login = this.login.bind(this);
-    this.logout = this.logout.bind(this);
+    this.loginWithCredentials = this.loginWithCredentials.bind(this);
+    this.socialLogin = this.socialLogin.bind(this);
     this.handleAuthentication = this.handleAuthentication.bind(this);
     this.isAuthenticated = this.isAuthenticated.bind(this);
-    this.socialLogin = this.socialLogin.bind(this);
     this.getAccessToken = this.getAccessToken.bind(this);
     this.getProfile = this.getProfile.bind(this);
-  }
-
-  login() {
-    this.auth0.authorize();
+    this.logout = this.logout.bind(this);
   }
 
   loginWithCredentials({username, password}) {
     this.auth0.redirect.loginWithCredentials({
-        username,
-        password,
-        connection: 'Username-Password-Authentication',
-        scope: 'openid'
+        username, password,
+        connection: DB_CONNECTION
     }, this.handleAuthentication);
   }
 
+  signup({email, password}) {
+    this.auth0.signup({
+        email, password,
+        connection: DB_CONNECTION
+    }, (err) => {
+        if(err) {
+            // TODO - manage error
+        } else {
+            this.loginWithCredentials({
+                username: email,
+                password
+            })
+        }
+    });
+  }
+
   socialLogin(connection) {
-      console.log(connection);
       this.auth0.authorize({connection});
   }
 
