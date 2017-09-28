@@ -7,7 +7,6 @@ class Home extends Component {
 
   getUserName() {
       const userProfile = JSON.parse(localStorage.getItem('profile'));
-      console.log(userProfile)
       return userProfile.name;
   }
   render() {
